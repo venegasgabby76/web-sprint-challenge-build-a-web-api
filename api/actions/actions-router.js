@@ -1,43 +1,97 @@
 // Write your "actions" router here!
 const express = require("express");
-const db = require("./actions-model");
+const actions = require("./actions-model");
 
 const router = express.Router();
 
-// get actions
-router.get("/", async (req,res) => {
-    try {
-        const actions = await db.get()
-        res.status(201).json(actions);
-    } catch {
-        res.status(500).json({ message : "server not working"})
-    }
-})
+router.get("/", (req, res) => {
+  actions
+    .get()
+    .then((action) => {
+      res.status(200).json(action);
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({
+        error: "Error getting action",
+      });
+    });
+});
 
-// get action by id
-router.get("/:id" , async (req,res) => {
-    const { id } = req.params;
-    try {
-        const actions = await db.get(id)
-        res.status(201).json(actions);
-    } catch {
-        res.status(500).json({ message : "server not working"})
-    }
-})
-
-//post a new action
-router.post("/", (req, res) => {
-    db.insert(req.body)
-      .then(actions => {
-        res.status(201).json(actions);
+// get projects by id
+router.get('/:id', (req, res) => {
+    actions
+    .get(req.params.id)
+      .then(action => {
+        if (action) {
+          res.status(200).json(action);
+        } else {
+          res.status(404).json({ message: 'Action not found' });
+        }
       })
       .catch(error => {
-        // log error to server
         console.log(error);
         res.status(500).json({
-          message: 'Error adding the action',
+          message: 'Error retrieving the action',
         });
       });
   });
+
+// add a new project
+router.post('/', (req, res) => {
+    actions
+    .insert(req.body)
+      .then(action => {
+        res.status(201).json(action);
+      })
+      .catch(error => {
+        console.log(error);
+        res.status(500).json({
+          message: 'Error adding the new action',
+        });
+      });
+  });
+
+  // update a post 
+  router.put('/:id', (req, res) => {
+    const updateAction = req.body;
+    actions
+    .update(req.params.id, updateAction)
+      .then(action => {
+        if (action) {
+          res.status(200).json({
+              message: "The action has been updated"
+          });
+        } else {
+          res.status(404).json({ message: 'The action could not be found' });
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        res.status(500).json({
+          message: 'Error updating the action',
+        });
+      });
+  });
+
+  // delete a project
+  router.delete('/:id', (req, res) => {
+    actions
+    .remove(req.params.id)
+      .then(count => {
+        if (count > 0) {
+          res.status(200).json({ message: 'The action has been deleted' });
+        } else {
+          res.status(404).json({ message: 'The action could not be found' });
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        res.status(500).json({
+          message: 'Error removing the action',
+        });
+      });
+  });
+
 
 module.exports = router;
