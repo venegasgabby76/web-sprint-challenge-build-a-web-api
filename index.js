@@ -14,3 +14,11 @@ Go code!
 */
 
 // this is going to be so that i can test and make sure that everything is working correctly 
+
+const server = require("./api/server")
+
+const PORT = process.env.PORT || 8800
+
+server.listen(PORT, () => {
+    console.log(`\n*** Server Running on http://localhost:${PORT} ***\n`)
+})
